@@ -1,0 +1,2455 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valserdeutsch Wörterbuch / Valser German Dictionary</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --swiss-red: #FF0000;
+            --swiss-white: #FFFFFF;
+            --vals-yellow: #fddd04;
+            --vals-black: #231f20;
+            --valser-red: #B22222;
+            --light-gray: #f5f5f5;
+            --border-gray: #ddd;
+            --text-dark: #333;
+            --text-medium: #666;
+            --selection-yellow: #e6c803;
+            --dark-yellow: #d4b803;
+            --valser-yellow: #a08e02;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-dark);
+            background: var(--light-gray);
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--vals-black) 0%, var(--vals-black) 50%, var(--vals-yellow) 50%, var(--vals-yellow) 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--vals-black);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid var(--vals-yellow);
+            padding-bottom: 0.5rem;
+            text-shadow: none;
+        }
+
+        #headerTitle {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .lang-toggle {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+        }
+
+        .lang-toggle label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--vals-black);
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--swiss-white);
+            transition: .3s;
+            border-radius: 24px;
+            border: 1px solid var(--vals-black);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--vals-black);
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+            background-color: var(--dark-yellow);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            display: flex;
+            gap: 2rem;
+            padding: 0 2rem;
+            height: calc(100vh - 140px);
+        }
+
+        .sidebar {
+            width: 350px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .search-box {
+            padding: 1rem;
+            border-bottom: 2px solid var(--vals-yellow);
+            background: linear-gradient(to bottom, var(--swiss-white), var(--light-gray));
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.75rem 2.5rem 0.75rem 1rem;
+            border: 2px solid var(--border-gray);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--vals-black);
+        }
+
+        .search-clear {
+            position: absolute;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(calc(-50% - 3px));
+            background: none;
+            color: var(--text-medium);
+            border: none;
+            cursor: pointer;
+            font-size: 1.3rem;
+            font-weight: 400;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .search-clear.show {
+            display: flex;
+        }
+
+        .search-clear:hover {
+            color: var(--text-dark);
+        }
+
+        .content-with-tabs {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .letter-tabs {
+            width: 40px;
+            background: white;
+            border-right: 2px solid var(--vals-black);
+            display: flex;
+            flex-direction: column;
+            padding: 0.5rem 0;
+            overflow-y: auto;
+        }
+
+        .letter-tab {
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--vals-black);
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .letter-tab:hover {
+            background: var(--light-gray);
+            border-left-color: var(--vals-yellow);
+        }
+
+        .letter-tab.active {
+            background: var(--vals-yellow);
+            color: var(--vals-black);
+            border-left-color: var(--vals-black);
+            font-weight: 700;
+        }
+
+        .letter-tab.disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .letter-tab.disabled:hover {
+            background: transparent;
+            border-left-color: transparent;
+        }
+
+        .word-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+
+        .word-item {
+            padding: 0.75rem 1rem;
+            margin: 0.25rem 0;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+            border-left: 3px solid transparent;
+        }
+
+        .word-item:hover {
+            background: var(--light-gray);
+            border-left-color: var(--vals-yellow);
+        }
+
+        .word-item.active {
+            background: var(--selection-yellow);
+            border-left-color: var(--vals-black);
+            font-weight: 600;
+        }
+
+        .headword {
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 1.05rem;
+        }
+
+        .variant {
+            color: var(--text-medium);
+            font-size: 0.95rem;
+        }
+
+        .search-highlight {
+            color: var(--valser-yellow);
+            font-weight: 700;
+        }
+
+        .main-panel {
+            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .word-detail-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding: 2rem;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-medium);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        .loading-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--text-medium);
+            padding: 2rem;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--light-gray);
+            border-top: 4px solid var(--vals-yellow);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .file-picker-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .file-picker-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .file-picker-button {
+            margin-top: 1.5rem;
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, var(--vals-black), var(--vals-yellow));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .file-picker-button:hover {
+            transform: translateY(-2px);
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .error-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--swiss-red);
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .word-detail {
+            display: none;
+        }
+
+        .word-detail.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+
+        .word-navigation {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            border-top: 2px solid var(--light-gray);
+            background: white;
+            flex-shrink: 0;
+        }
+
+        .nav-button {
+            flex: 1;
+            background: var(--vals-black);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.2s;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .nav-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .nav-button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        .nav-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .nav-button-label {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+
+        .nav-button-word {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .word-navigation {
+                flex-direction: column;
+            }
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            width: 50%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            position: relative;
+            padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 90%;
+                max-height: 90vh;
+            }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--vals-black);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            opacity: 0.7;
+        }
+
+        .modal-content h1,
+        .modal-content h2,
+        .modal-content h3,
+        .modal-content h4,
+        .modal-content h5,
+        .modal-content h6 {
+            color: var(--vals-black);
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .modal-content h1 {
+            color: var(--vals-black);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid var(--vals-yellow);
+            padding-bottom: 0.5rem;
+            text-shadow: none;
+        }
+
+        .modal-content h2 {
+            font-size: 1.5rem;
+        }
+
+        .modal-content h3 {
+            font-size: 1.25rem;
+        }
+
+        .modal-content p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .modal-content ul,
+        .modal-content ol {
+            margin-bottom: 1rem;
+            margin-left: 1.5rem;
+        }
+
+        .modal-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-content code {
+            background: var(--light-gray);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .modal-content pre {
+            background: var(--light-gray);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        .modal-content blockquote {
+            border-left: 4px solid var(--vals-yellow);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--text-medium);
+        }
+
+        .modal-content a {
+            color: var(--vals-black);
+            font-weight: 600;
+        }
+
+        .modal-content a:hover {
+            opacity: 0.7;
+        }
+
+        #welcomeState {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        #introContent {
+            margin-bottom: 2rem;
+        }
+
+        #introContent h1,
+        #welcomeState h1 {
+            color: var(--vals-black);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid var(--vals-yellow);
+            padding-bottom: 0.5rem;
+            text-shadow: none;
+        }
+
+        #introContent h2,
+        #welcomeState h2 {
+            color: var(--vals-black);
+            font-size: 1.8rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        #introContent h3,
+        #welcomeState h3 {
+            color: var(--vals-black);
+            font-size: 1.4rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        #introContent p,
+        #welcomeState p {
+            margin-bottom: 1rem;
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+
+        #introContent ul,
+        #introContent ol,
+        #welcomeState ul,
+        #welcomeState ol {
+            margin-bottom: 1rem;
+            margin-left: 1.5rem;
+        }
+
+        #introContent li,
+        #welcomeState li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        #introContent code,
+        #welcomeState code {
+            background: var(--light-gray);
+            padding: 0.2rem 0.4rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        #introContent pre,
+        #welcomeState pre {
+            background: var(--light-gray);
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin-bottom: 1rem;
+        }
+
+        #introContent blockquote,
+        #welcomeState blockquote {
+            border-left: 4px solid var(--vals-yellow);
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: var(--text-medium);
+        }
+
+        #introContent a,
+        #welcomeState a {
+            color: var(--vals-black);
+            font-weight: 600;
+            text-decoration: underline;
+        }
+
+        #introContent a:hover,
+        #welcomeState a:hover {
+            opacity: 0.7;
+        }
+
+        #introContent table,
+        #welcomeState table,
+        .modal-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            table-layout: fixed;
+        }
+
+        #introContent th,
+        #welcomeState th,
+        .modal-content th {
+            background-color: var(--light-gray);
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--border-gray);
+        }
+
+        #introContent th:first-child,
+        #welcomeState th:first-child,
+        .modal-content th:first-child {
+            width: 30%;
+        }
+
+        #introContent td,
+        #welcomeState td,
+        .modal-content td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--light-gray);
+            vertical-align: top;
+        }
+
+        #introContent tr:last-child td,
+        #welcomeState tr:last-child td,
+        .modal-content tr:last-child td {
+            border-bottom: none;
+        }
+
+        #introContent tbody tr:hover,
+        #welcomeState tbody tr:hover,
+        .modal-content tbody tr:hover {
+            background-color: rgba(253, 221, 4, 0.1);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--vals-black);
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .nav-link:hover {
+            opacity: 0.8;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-headword {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--vals-black);
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid var(--vals-yellow);
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 1rem;
+            position: relative;
+        }
+
+        .headword-text {
+            display: flex;
+            align-items: baseline;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .permalink-button {
+            background: white;
+            border: 1px solid var(--border-gray);
+            border-radius: 4px;
+            padding: 0.4rem 0.6rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .permalink-button:hover {
+            background: var(--light-gray);
+            border-color: var(--text-medium);
+        }
+
+        .permalink-button svg {
+            width: 18px;
+            height: 18px;
+            fill: var(--text-medium);
+        }
+
+        .permalink-tooltip {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            right: 0;
+            background: var(--vals-black);
+            color: white;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 1000;
+        }
+
+        .permalink-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            right: 12px;
+            border: 5px solid transparent;
+            border-top-color: var(--vals-black);
+        }
+
+        .permalink-button:hover .permalink-tooltip {
+            opacity: 1;
+        }
+
+        .permalink-copied {
+            background: #4CAF50 !important;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .permalink-button {
+                padding: 0.3rem 0.5rem;
+            }
+
+            .permalink-button svg {
+                width: 16px;
+                height: 16px;
+            }
+
+            .permalink-tooltip {
+                bottom: calc(100% + 6px);
+                font-size: 0.8rem;
+            }
+        }
+
+        .detail-gender {
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: var(--text-medium);
+        }
+
+        .detail-usage-note {
+            font-size: 1.1rem;
+            font-weight: 400;
+            color: var(--text-dark);
+        }
+
+        .detail-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--vals-black);
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 2px solid var(--vals-yellow);
+        }
+
+        .field-group {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 0.5rem 1rem;
+            align-items: baseline;
+        }
+
+        .field-label {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .field-value {
+            color: var(--text-medium);
+        }
+
+        .alternative-value {
+            font-weight: 700;
+            font-size: 1.15rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+            grid-column: 1 / -1;
+        }
+
+        .alternative-gender {
+            font-weight: 400;
+            color: var(--text-medium);
+        }
+
+        .alternatives-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .alternative-column {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .alternatives-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .detail-definition {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-dark);
+        }
+
+        .detail-definition {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-dark);
+        }
+
+        .valser {
+            font-style: italic;
+            color: var(--valser-yellow);
+            font-weight: 500;
+        }
+
+        .old {
+            background-color: var(--text-medium);
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: help;
+            vertical-align: baseline;
+        }
+
+        .idiom {
+            background-color: #607D8B;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: help;
+            vertical-align: baseline;
+        }
+
+        .jorger {
+            background-color: #689F38;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: help;
+            vertical-align: baseline;
+        }
+
+        .unverified {
+            background-color: #D32F2F;
+            color: white;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-size: 0.75em;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: help;
+            vertical-align: baseline;
+        }
+
+        .xref {
+            color: var(--vals-black);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .xref:hover {
+            background: var(--vals-yellow);
+            padding: 0 2px;
+        }
+
+        .xref-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            border: 2px solid var(--vals-black);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            width: 300px;
+            max-width: 90vw;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .xref-tooltip.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .xref-tooltip-headword {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--vals-black);
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--vals-yellow);
+        }
+
+        .xref-tooltip-definition {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--text-dark);
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .back-button {
+            background: var(--vals-black);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+            transition: transform 0.2s, opacity 0.2s;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .back-button.show {
+            display: inline-flex;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .back-button:active {
+            transform: translateY(0);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--light-gray);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--vals-black);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--swiss-red);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1 id="headerTitle">Valserdeutsch Wörterbuch</h1>
+            <div style="display: flex; align-items: center; gap: 2rem;">
+                <div class="nav-links">
+                    <a class="nav-link" id="valserdeutschLink">Valserdeutsch</a>
+                    <a class="nav-link" id="abbreviationsLink">Abkürzungen</a>
+                    <a class="nav-link" id="aboutLink">Über</a>
+                </div>
+                <div class="lang-toggle">
+                    <label for="langSwitch">DE</label>
+                    <label class="switch">
+                        <input type="checkbox" id="langSwitch">
+                        <span class="slider"></span>
+                    </label>
+                    <label for="langSwitch">EN</label>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside class="sidebar">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Wort suchen..." />
+                <button class="search-clear" id="searchClear" title="Clear search">×</button>
+            </div>
+            <div class="content-with-tabs">
+                <div class="letter-tabs" id="letterTabs"></div>
+                <div class="word-list" id="wordList"></div>
+            </div>
+        </aside>
+
+        <main class="main-panel" id="mainPanel">
+            <div class="loading-state" id="loadingState">
+                <div class="loading-spinner"></div>
+                <p id="loadingText">Wörterbuch wird geladen...</p>
+            </div>
+        </main>
+    </div>
+
+    <input type="file" id="fileInput" accept=".json" />
+
+    <!-- Valserdeutsch Modal -->
+    <div class="modal-overlay" id="valserdeutschModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('valserdeutschModal')">×</button>
+            <div id="valserdeutschContent">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Abbreviations Modal -->
+    <div class="modal-overlay" id="abbreviationsModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('abbreviationsModal')">×</button>
+            <div id="abbreviationsContent">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Modal -->
+    <div class="modal-overlay" id="aboutModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeModal('aboutModal')">×</button>
+            <div id="aboutContent">
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let dictionaryData = [];
+        let currentLang = 'de';
+        let activeWordIndex = null;
+        let navigationHistory = [];
+        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+        // Translation object
+        const translations = {
+            de: {
+                headerTitle: 'Valserdeutsch Wörterbuch',
+                searchPlaceholder: 'Wort suchen...',
+                clearSearch: 'Suche löschen',
+                emptyTitle: 'Wählen Sie ein Wort aus der Liste',
+                emptyText: 'Klicken Sie auf ein Wort in der Seitenleiste, um die Definition anzuzeigen',
+                loading: 'Wörterbuch wird geladen...',
+                errorLoading: 'Fehler beim Laden des Wörterbuchs',
+                filePickerTitle: 'JSON-Datei auswählen',
+                filePickerText: 'Bitte wählen Sie die Datei valserdict.json aus',
+                filePickerButton: 'JSON-Datei auswählen',
+                fileError: 'Fehler beim Lesen der Datei',
+                // Section headers
+                wordForms: 'Wortformen',
+                alternatives: 'Alternativen',
+                definition: 'Definition',
+                back: 'Zurück',
+                previousWord: 'Vorheriges Wort',
+                nextWord: 'Nächstes Wort',
+                altTooltip: 'Alt; kaum oder nicht mehr gebräuchlich',
+                idiomTooltip: 'Redensart/Redewendung',
+                jorgerTooltip: 'Quelle Johann Josef Jörger',
+                unverifiedTooltip: 'Einzelnennungen (nicht verifiziert)',
+                valserdeutschLink: 'Valserdeutsch',
+                abbreviationsLink: 'Abkürzungen',
+                aboutLink: 'Über',
+                copyPermalink: 'Permalink kopieren',
+                permalinkCopied: 'Permalink kopiert!',
+                // Field labels
+                plural: 'Plural',
+                plurals: 'Plurale',
+                plural1: 'Plural 1',
+                plural2: 'Plural 2',
+                plural3: 'Plural 3',
+                diminutive: 'Diminutiv',
+                diminutives: 'Diminutive',
+                diminutive1: 'Diminutiv 1',
+                diminutive2: 'Diminutiv 2',
+                pastParticiple: 'Partizip Perfekt',
+                pastParticiples: 'Partizipien Perfekt',
+                pastParticiple1: 'Partizip Perfekt 1',
+                pastParticiple2: 'Partizip Perfekt 2',
+                variant: 'Variante',
+                variantPlural: 'Variante Plural',
+                variantPastParticiple: 'Variante Partizip Perfekt',
+                stress: 'Betonung',
+                alternative: 'Alternative',
+                alternative1: 'Alternative 1',
+                gender: 'Geschlecht',
+                gender1: 'Geschlecht 1',
+                alternative2: 'Alternative 2',
+                alternative3: 'Alternative 3',
+                alternative4: 'Alternative 4'
+            },
+            en: {
+                headerTitle: 'Valser German Dictionary',
+                searchPlaceholder: 'Search word...',
+                clearSearch: 'Clear search',
+                emptyTitle: 'Select a word from the list',
+                emptyText: 'Click on a word in the sidebar to view its definition',
+                loading: 'Loading dictionary...',
+                errorLoading: 'Error loading dictionary',
+                filePickerTitle: 'Select JSON File',
+                filePickerText: 'Please select the valserdict.json file',
+                filePickerButton: 'Choose JSON File',
+                fileError: 'Error reading file',
+                // Section headers
+                wordForms: 'Word Forms',
+                alternatives: 'Alternatives',
+                definition: 'Definition',
+                back: 'Back',
+                previousWord: 'Previous Word',
+                nextWord: 'Next Word',
+                altTooltip: 'Old; no longer or hardly in use',
+                idiomTooltip: 'Idiom/Saying',
+                jorgerTooltip: 'Source Johann Josef Jörger',
+                unverifiedTooltip: 'Single mentions (not verified)',
+                valserdeutschLink: 'Valserdeutsch',
+                abbreviationsLink: 'Abbreviations',
+                aboutLink: 'About',
+                copyPermalink: 'Copy permalink',
+                permalinkCopied: 'Permalink copied!',
+                // Field labels
+                plural: 'Plural',
+                plurals: 'Plurals',
+                plural1: 'Plural 1',
+                plural2: 'Plural 2',
+                plural3: 'Plural 3',
+                diminutive: 'Diminutive',
+                diminutives: 'Diminutives',
+                diminutive1: 'Diminutive 1',
+                diminutive2: 'Diminutive 2',
+                pastParticiple: 'Past Participle',
+                pastParticiples: 'Past Participles',
+                pastParticiple1: 'Past Participle 1',
+                pastParticiple2: 'Past Participle 2',
+                variant: 'Variant',
+                variantPlural: 'Variant Plural',
+                variantPastParticiple: 'Variant Past Participle',
+                stress: 'Stress',
+                alternative: 'Alternative',
+                alternative1: 'Alternative 1',
+                gender: 'Gender',
+                gender1: 'Gender 1',
+                alternative2: 'Alternative 2',
+                alternative3: 'Alternative 3',
+                alternative4: 'Alternative 4'
+            }
+        };
+
+        // Load dictionary data from external JSON file
+        async function loadDictionary() {
+            try {
+                const response = await fetch('valserdict.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                dictionaryData = await response.json();
+                init();
+            } catch (error) {
+                console.log('Automatic loading failed, showing file picker:', error);
+                showFilePicker();
+            }
+        }
+
+        // Show file picker for local usage
+        function showFilePicker() {
+            const mainPanel = document.getElementById('mainPanel');
+            const loadingState = document.getElementById('loadingState');
+            loadingState.style.display = 'none';
+            
+            const filePickerState = document.createElement('div');
+            filePickerState.className = 'file-picker-state';
+            filePickerState.innerHTML = `
+                <div class="file-picker-icon">📁</div>
+                <h2 id="filePickerTitle">${translations[currentLang].filePickerTitle}</h2>
+                <p id="filePickerText">${translations[currentLang].filePickerText}</p>
+                <button class="file-picker-button" id="selectFileBtn">${translations[currentLang].filePickerButton}</button>
+            `;
+            mainPanel.appendChild(filePickerState);
+
+            document.getElementById('selectFileBtn').addEventListener('click', () => {
+                document.getElementById('fileInput').click();
+            });
+
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+        }
+
+        // Handle file selection
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    dictionaryData = JSON.parse(e.target.result);
+                    init();
+                } catch (error) {
+                    console.error('Error parsing JSON:', error);
+                    showError(translations[currentLang].fileError);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Show error state
+        function showError(message) {
+            const mainPanel = document.getElementById('mainPanel');
+            mainPanel.innerHTML = '';
+            
+            const errorState = document.createElement('div');
+            errorState.className = 'error-state';
+            errorState.innerHTML = `
+                <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+                <h2>${message || translations[currentLang].errorLoading}</h2>
+            `;
+            mainPanel.appendChild(errorState);
+        }
+
+        // Get available letters from dictionary data
+        function getAvailableLetters() {
+            const letters = new Set();
+            dictionaryData.forEach(entry => {
+                const headword = entry.word.find(w => w.type === 'headword');
+                if (headword && headword.text) {
+                    const firstLetter = headword.text.charAt(0).toUpperCase();
+                    // Handle special characters - normalize to closest letter
+                    const normalized = firstLetter.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    letters.add(normalized);
+                }
+            });
+            return letters;
+        }
+
+        // Initialize the app
+        function init() {
+            const loadingState = document.getElementById('loadingState');
+            const mainPanel = document.getElementById('mainPanel');
+            
+            // Hide loading state
+            if (loadingState) {
+                loadingState.style.display = 'none';
+            }
+            
+            // Clear main panel and show welcome state
+            mainPanel.innerHTML = '';
+            
+            const welcomeState = document.createElement('div');
+            welcomeState.className = 'word-detail-wrapper';
+            welcomeState.id = 'welcomeState';
+            welcomeState.style.padding = '2rem';
+            
+            // Create container for intro markdown
+            const introContainer = document.createElement('div');
+            introContainer.id = 'introContent';
+            welcomeState.appendChild(introContainer);
+            
+            // Add horizontal separator
+            const separator = document.createElement('hr');
+            separator.style.border = 'none';
+            separator.style.borderTop = '2px solid var(--light-gray)';
+            separator.style.margin = '2rem 0';
+            welcomeState.appendChild(separator);
+            
+            // Create container for empty state message
+            const t = translations[currentLang];
+            const emptyStateContainer = document.createElement('div');
+            emptyStateContainer.style.textAlign = 'center';
+            emptyStateContainer.style.color = 'var(--text-medium)';
+            emptyStateContainer.innerHTML = `
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📖</div>
+                <h2 style="color: var(--text-dark); margin-bottom: 0.5rem;">${t.emptyTitle}</h2>
+                <p>${t.emptyText}</p>
+            `;
+            welcomeState.appendChild(emptyStateContainer);
+            
+            mainPanel.appendChild(welcomeState);
+            loadMarkdown(`about_${currentLang}.md`, 'introContent');
+            
+            renderLetterTabs();
+            renderWordList();
+            setupEventListeners();
+            
+            // Check for permalink in URL
+            checkPermalinkInUrl();
+        }
+
+        // Check if URL contains a word parameter and navigate to it
+        function checkPermalinkInUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const word = urlParams.get('word');
+            
+            if (word) {
+                // Find the word in the dictionary
+                const index = dictionaryData.findIndex(entry => {
+                    const headword = entry.word.find(w => w.type === 'headword');
+                    return headword && headword.text.toLowerCase() === word.toLowerCase();
+                });
+                
+                if (index !== -1) {
+                    // Navigate to the word
+                    selectWord(index);
+                    
+                    // Scroll the word into view in the sidebar
+                    setTimeout(() => {
+                        const wordItem = document.querySelector(`.word-item[data-index="${index}"]`);
+                        if (wordItem) {
+                            wordItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 100);
+                }
+            }
+        }
+
+        // Render letter tabs
+        function renderLetterTabs() {
+            const letterTabs = document.getElementById('letterTabs');
+            letterTabs.innerHTML = '';
+            const availableLetters = getAvailableLetters();
+
+            let firstAvailableLetter = null;
+            alphabet.forEach(letter => {
+                const tab = document.createElement('div');
+                tab.className = 'letter-tab';
+                tab.textContent = letter;
+                tab.dataset.letter = letter;
+
+                if (availableLetters.has(letter)) {
+                    tab.addEventListener('click', () => jumpToLetter(letter));
+                    if (!firstAvailableLetter) {
+                        firstAvailableLetter = letter;
+                        tab.classList.add('active');
+                    }
+                } else {
+                    tab.classList.add('disabled');
+                }
+
+                letterTabs.appendChild(tab);
+            });
+        }
+
+        // Jump to letter
+        function jumpToLetter(letter) {
+            // Update active tab
+            document.querySelectorAll('.letter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelector(`.letter-tab[data-letter="${letter}"]`).classList.add('active');
+
+            // Find first word starting with this letter
+            const index = dictionaryData.findIndex(entry => {
+                const headword = entry.word.find(w => w.type === 'headword');
+                if (headword && headword.text) {
+                    const firstLetter = headword.text.charAt(0).toUpperCase();
+                    const normalized = firstLetter.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    return normalized === letter;
+                }
+                return false;
+            });
+
+            if (index !== -1) {
+                // Scroll to the word in the list
+                const wordItems = document.querySelectorAll('.word-item');
+                if (wordItems[index]) {
+                    wordItems[index].scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
+
+        // Render word list
+        function renderWordList() {
+            const wordList = document.getElementById('wordList');
+            wordList.innerHTML = '';
+
+            dictionaryData.forEach((entry, index) => {
+                const wordItem = document.createElement('div');
+                wordItem.className = 'word-item';
+                wordItem.dataset.index = index;
+
+                const headword = entry.word.find(w => w.type === 'headword');
+                const variants = entry.word.filter(w => w.type === 'variant');
+
+                let displayText = `<span class="headword">${headword.text}</span>`;
+                if (variants.length > 0) {
+                    displayText += ` <span class="variant">/ ${variants.map(v => v.text).join(', ')}</span>`;
+                }
+
+                wordItem.innerHTML = displayText;
+                wordItem.addEventListener('click', () => selectWord(index));
+
+                wordList.appendChild(wordItem);
+            });
+        }
+
+        // Select a word
+        function selectWord(index, addToHistory = true) {
+            // Add current word to history before navigating
+            if (addToHistory && activeWordIndex !== null && activeWordIndex !== index) {
+                navigationHistory.push(activeWordIndex);
+            }
+
+            // Remove previous active state
+            document.querySelectorAll('.word-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Set new active state - find by data-index attribute
+            const targetItem = document.querySelector(`.word-item[data-index="${index}"]`);
+            if (targetItem) {
+                targetItem.classList.add('active');
+                // Scroll the word into view in the sidebar
+                targetItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+
+            activeWordIndex = index;
+            renderWordDetail(index);
+        }
+
+        // Go back to previous word
+        window.goBack = function() {
+            if (navigationHistory.length > 0) {
+                const previousIndex = navigationHistory.pop();
+                selectWord(previousIndex, false);
+            }
+        }
+
+        // Render word detail
+        function renderWordDetail(index) {
+            const entry = dictionaryData[index];
+            const mainPanel = document.getElementById('mainPanel');
+            const welcomeState = document.getElementById('welcomeState');
+
+            // Hide welcome state
+            if (welcomeState) {
+                welcomeState.style.display = 'none';
+            }
+
+            // Clear main panel
+            mainPanel.innerHTML = '';
+
+            // Create wrapper for scrollable content
+            const wrapper = document.createElement('div');
+            wrapper.className = 'word-detail-wrapper';
+
+            // Create new word detail
+            const wordDetail = document.createElement('div');
+            wordDetail.className = 'word-detail active';
+
+            // Get current language translations
+            const t = translations[currentLang];
+
+            // Helper function to get field by type
+            const getField = (type) => entry.word.find(w => w.type === type);
+            
+            // Helper function to get multiple fields and combine values
+            const getFieldGroup = (types) => {
+                const fields = types.map(type => getField(type)).filter(f => f);
+                if (fields.length === 0) return null;
+                return fields.map(f => f.text).join(', ');
+            };
+            
+            // Helper function to add field to HTML
+            const addField = (label, field) => {
+                if (field) {
+                    return `
+                        <div class="field-label">${label}:</div>
+                        <div class="field-value">${field.text}</div>
+                    `;
+                }
+                return '';
+            };
+
+            // Helper function to add consolidated field group to HTML
+            const addFieldGroup = (label, values) => {
+                if (values) {
+                    return `
+                        <div class="field-label">${label}:</div>
+                        <div class="field-value">${values}</div>
+                    `;
+                }
+                return '';
+            };
+
+            // Get headword and gender
+            const headword = getField('headword');
+            const gender = getField('gender');
+            const usageNote = getField('usage_note');
+
+            // Add back button if there's navigation history
+            let html = '';
+            if (navigationHistory.length > 0) {
+                html += `<button class="back-button show" onclick="goBack()">← ${t.back}</button>`;
+            }
+
+            // Process usage note if it exists
+            let processedUsageNote = '';
+            if (usageNote) {
+                processedUsageNote = usageNote.text
+                    .replace(/<valser>(.*?)<\/valser>/g, '<span class="valser">$1</span>')
+                    .replace(/<old>(.*?)<\/old>/g, `<span class="old" title="${t.altTooltip}">$1</span>`)
+                    .replace(/<idiom>(.*?)<\/idiom>/g, `<span class="idiom" title="${t.idiomTooltip}">$1</span>`)
+                    .replace(/<jorger>(.*?)<\/jorger>/g, `<span class="jorger" title="${t.jorgerTooltip}">$1</span>`)
+                    .replace(/<unverified>(.*?)<\/unverified>/g, `<span class="unverified" title="${t.unverifiedTooltip}">$1</span>`)
+                    .replace(/<xref>(.*?)<\/xref>/g, (match, content) => {
+                        // Check if content has display|target format
+                        const parts = content.split('|');
+                        const displayText = parts[0];
+                        const targetWord = parts.length > 1 ? parts[1] : parts[0];
+                        return `<span class="xref" data-word="${targetWord}" data-display="${displayText}">${displayText}</span>`;
+                    });
+            }
+
+            html += `<div class="detail-headword">
+                <div class="headword-text">
+                    <span>${headword.text}</span>
+                    ${gender ? `<span class="detail-gender">${gender.text}</span>` : ''}
+                    ${processedUsageNote ? `<span class="detail-usage-note">${processedUsageNote}</span>` : ''}
+                </div>
+                <button class="permalink-button" onclick="copyPermalink('${headword.text.replace(/'/g, "\\'")}')">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M10.59,13.41C11,13.8 11,14.44 10.59,14.83C10.2,15.22 9.56,15.22 9.17,14.83C7.22,12.88 7.22,9.71 9.17,7.76V7.76L12.71,4.22C14.66,2.27 17.83,2.27 19.78,4.22C21.73,6.17 21.73,9.34 19.78,11.29L18.29,12.78C18.3,11.96 18.17,11.14 17.89,10.36L18.36,9.88C19.54,8.71 19.54,6.81 18.36,5.64C17.19,4.46 15.29,4.46 14.12,5.64L10.59,9.17C9.41,10.34 9.41,12.24 10.59,13.41M13.41,9.17C13.8,8.78 14.44,8.78 14.83,9.17C16.78,11.12 16.78,14.29 14.83,16.24V16.24L11.29,19.78C9.34,21.73 6.17,21.73 4.22,19.78C2.27,17.83 2.27,14.66 4.22,12.71L5.71,11.22C5.7,12.04 5.83,12.86 6.11,13.65L5.64,14.12C4.46,15.29 4.46,17.19 5.64,18.36C6.81,19.54 8.71,19.54 9.88,18.36L13.41,14.83C14.59,13.66 14.59,11.76 13.41,10.59C13,10.2 13,9.56 13.41,9.17Z"/>
+                    </svg>
+                    <span class="permalink-tooltip">${t.copyPermalink}</span>
+                </button>
+            </div>`;
+
+            // Word Forms Section
+            let wordFormsHtml = '';
+            
+            // Plurals (consolidated)
+            const plurals = getFieldGroup(['plural', 'plural_1', 'plural_2', 'plural_3']);
+            if (plurals) {
+                const pluralCount = ['plural', 'plural_1', 'plural_2', 'plural_3']
+                    .filter(type => getField(type)).length;
+                wordFormsHtml += addFieldGroup(pluralCount > 1 ? t.plurals : t.plural, plurals);
+            }
+            
+            // Diminutives (consolidated)
+            const diminutives = getFieldGroup(['diminutive', 'diminutive_1', 'diminutive_2']);
+            if (diminutives) {
+                const dimCount = ['diminutive', 'diminutive_1', 'diminutive_2']
+                    .filter(type => getField(type)).length;
+                wordFormsHtml += addFieldGroup(dimCount > 1 ? t.diminutives : t.diminutive, diminutives);
+            }
+            
+            // Past Participles (consolidated)
+            const pastParticiples = getFieldGroup(['past_participle', 'past_participle_1', 'past_participle_2']);
+            if (pastParticiples) {
+                const ppCount = ['past_participle', 'past_participle_1', 'past_participle_2']
+                    .filter(type => getField(type)).length;
+                wordFormsHtml += addFieldGroup(ppCount > 1 ? t.pastParticiples : t.pastParticiple, pastParticiples);
+            }
+            
+            // Other single fields
+            wordFormsHtml += addField(t.variant, getField('variant'));
+            wordFormsHtml += addField(t.variantPlural, getField('variant_plural'));
+            wordFormsHtml += addField(t.variantPastParticiple, getField('variant_past_participle'));
+            wordFormsHtml += addField(t.stress, getField('stress'));
+
+            if (wordFormsHtml) {
+                html += `
+                    <div class="detail-section">
+                        <div class="section-header">${t.wordForms}</div>
+                        <div class="field-group">
+                            ${wordFormsHtml}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Alternatives Section
+            let alternativesHtml = '';
+            
+            // Alternative 1
+            let alt1Html = '';
+            const alt = getField('alternative');
+            const alt1 = getField('alternative_1');
+            const altGender = getField('alternative_gender');
+            const alt1Gender = getField('alternative_1_gender');
+            
+            if (alt) {
+                const genderText = altGender ? ` <span class="alternative-gender">${altGender.text}</span>` : '';
+                alt1Html += `<div class="alternative-value">${alt.text}${genderText}</div>`;
+            }
+            if (alt1) {
+                const genderText = alt1Gender ? ` <span class="alternative-gender">${alt1Gender.text}</span>` : '';
+                alt1Html += `<div class="alternative-value">${alt1.text}${genderText}</div>`;
+            }
+            
+            alt1Html += addField(t.plural, getField('alternative_plural'));
+            
+            // Consolidate alternative past participles
+            const altPP = getFieldGroup(['alternative_past_participle', 'alternative_1_past_participle']);
+            if (altPP) {
+                const altPPCount = ['alternative_past_participle', 'alternative_1_past_participle']
+                    .filter(type => getField(type)).length;
+                alt1Html += addFieldGroup(altPPCount > 1 ? t.pastParticiples : t.pastParticiple, altPP);
+            }
+            
+            alt1Html += addField(t.variant, getField('alternative_variant'));
+            alt1Html += addField(t.variant + ' 1', getField('alternative_1_variant'));
+            alt1Html += addField(t.stress, getField('alternative_stress'));
+            alt1Html += addField(t.stress + ' 1', getField('alternative_1_stress'));
+            alt1Html += addField(t.diminutive, getField('alternative_diminutive'));
+            
+            if (alt1Html) {
+                alternativesHtml += `
+                    <div class="alternative-column">
+                        <div class="field-group">
+                            ${alt1Html}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Alternative 2
+            let alt2Html = '';
+            const alt2 = getField('alternative_2');
+            const alt2Gender = getField('alternative_2_gender');
+            
+            if (alt2) {
+                const genderText = alt2Gender ? ` <span class="alternative-gender">${alt2Gender.text}</span>` : '';
+                alt2Html += `<div class="alternative-value">${alt2.text}${genderText}</div>`;
+            }
+            
+            alt2Html += addField(t.pastParticiple, getField('alternative_2_past_participle'));
+            alt2Html += addField(t.variant, getField('alternative_2_variant'));
+            alt2Html += addField(t.stress, getField('alternative_2_stress'));
+            
+            if (alt2Html) {
+                alternativesHtml += `
+                    <div class="alternative-column">
+                        <div class="field-group">
+                            ${alt2Html}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Alternative 3
+            let alt3Html = '';
+            const alt3 = getField('alternative_3');
+            if (alt3) alt3Html += `<div class="alternative-value">${alt3.text}</div>`;
+            
+            alt3Html += addField(t.variant, getField('alternative_3_variant'));
+            
+            if (alt3Html) {
+                alternativesHtml += `
+                    <div class="alternative-column">
+                        <div class="field-group">
+                            ${alt3Html}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Alternative 4
+            let alt4Html = '';
+            const alt4 = getField('alternative_4');
+            if (alt4) alt4Html += `<div class="alternative-value">${alt4.text}</div>`;
+            
+            if (alt4Html) {
+                alternativesHtml += `
+                    <div class="alternative-column">
+                        <div class="field-group">
+                            ${alt4Html}
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (alternativesHtml) {
+                html += `
+                    <div class="detail-section">
+                        <div class="section-header">${t.alternatives}</div>
+                        <div class="alternatives-grid">
+                            ${alternativesHtml}
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Definition Section
+            if (entry.definition) {
+                let processedDefinition = entry.definition
+                    .replace(/<valser>(.*?)<\/valser>/g, '<span class="valser">$1</span>')
+                    .replace(/<old>(.*?)<\/old>/g, `<span class="old" title="${t.altTooltip}">$1</span>`)
+                    .replace(/<idiom>(.*?)<\/idiom>/g, `<span class="idiom" title="${t.idiomTooltip}">$1</span>`)
+                    .replace(/<jorger>(.*?)<\/jorger>/g, `<span class="jorger" title="${t.jorgerTooltip}">$1</span>`)
+                    .replace(/<unverified>(.*?)<\/unverified>/g, `<span class="unverified" title="${t.unverifiedTooltip}">$1</span>`)
+                    .replace(/<xref>(.*?)<\/xref>/g, (match, content) => {
+                        // Check if content has display|target format
+                        const parts = content.split('|');
+                        const displayText = parts[0];
+                        const targetWord = parts.length > 1 ? parts[1] : parts[0];
+                        return `<span class="xref" data-word="${targetWord}" data-display="${displayText}">${displayText}</span>`;
+                    });
+
+                html += `
+                    <div class="detail-section">
+                        <div class="section-header">${t.definition}</div>
+                        <div class="detail-definition">${processedDefinition}</div>
+                    </div>
+                `;
+            }
+
+            wordDetail.innerHTML = html;
+            wrapper.appendChild(wordDetail);
+            mainPanel.appendChild(wrapper);
+
+            // Add navigation buttons (outside wrapper, at bottom of panel)
+            addNavigationButtons(mainPanel, index);
+
+            // Add event listeners to all xref elements
+            setupXrefListeners();
+        }
+
+        // Add navigation buttons to main panel
+        function addNavigationButtons(mainPanel, currentIndex) {
+            const t = translations[currentLang];
+            const prevIndex = currentIndex - 1;
+            const nextIndex = currentIndex + 1;
+
+            const navDiv = document.createElement('div');
+            navDiv.className = 'word-navigation';
+
+            let navHtml = '';
+
+            // Previous button
+            if (prevIndex >= 0) {
+                const prevWord = dictionaryData[prevIndex].word.find(w => w.type === 'headword');
+                navHtml += `
+                    <button class="nav-button" onclick="navigateToWord(${prevIndex})">
+                        <span class="nav-button-label">${t.previousWord}:</span>
+                        <span class="nav-button-word">${prevWord.text}</span>
+                    </button>
+                `;
+            } else {
+                navHtml += `
+                    <button class="nav-button" disabled>
+                        <span class="nav-button-label">${t.previousWord}</span>
+                        <span class="nav-button-word">—</span>
+                    </button>
+                `;
+            }
+
+            // Next button
+            if (nextIndex < dictionaryData.length) {
+                const nextWord = dictionaryData[nextIndex].word.find(w => w.type === 'headword');
+                navHtml += `
+                    <button class="nav-button" onclick="navigateToWord(${nextIndex})">
+                        <span class="nav-button-label">${t.nextWord}:</span>
+                        <span class="nav-button-word">${nextWord.text}</span>
+                    </button>
+                `;
+            } else {
+                navHtml += `
+                    <button class="nav-button" disabled>
+                        <span class="nav-button-label">${t.nextWord}</span>
+                        <span class="nav-button-word">—</span>
+                    </button>
+                `;
+            }
+
+            navDiv.innerHTML = navHtml;
+            mainPanel.appendChild(navDiv);
+        }
+
+        // Navigate to a word by index
+        window.navigateToWord = function(index) {
+            selectWord(index);
+        }
+
+        // Copy permalink to clipboard
+        window.copyPermalink = async function(headword) {
+            const baseUrl = window.location.origin + window.location.pathname;
+            const permalink = `${baseUrl}?word=${encodeURIComponent(headword)}&lang=${currentLang}`;
+            
+            const button = event.target.closest('.permalink-button');
+            const tooltip = button.querySelector('.permalink-tooltip');
+            const originalText = tooltip.textContent;
+            
+            try {
+                // Try modern clipboard API first
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(permalink);
+                } else {
+                    // Fallback for localhost and older browsers
+                    const textArea = document.createElement('textarea');
+                    textArea.value = permalink;
+                    textArea.style.position = 'fixed';
+                    textArea.style.left = '-999999px';
+                    textArea.style.top = '-999999px';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    
+                    const successful = document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    
+                    if (!successful) {
+                        throw new Error('execCommand failed');
+                    }
+                }
+                
+                // Show success feedback
+                tooltip.textContent = translations[currentLang].permalinkCopied;
+                button.classList.add('permalink-copied');
+                
+                setTimeout(() => {
+                    tooltip.textContent = originalText;
+                    button.classList.remove('permalink-copied');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy permalink:', err);
+                
+                // Show the permalink in a prompt as last resort
+                prompt('Copy this permalink:', permalink);
+            }
+        }
+
+        // Modal control functions
+        window.openModal = function(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden'; // Prevent background scrolling
+            }
+        }
+
+        window.closeModal = function(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = ''; // Restore scrolling
+            }
+        }
+
+        // Close modal when clicking outside content
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal-overlay')) {
+                closeModal(e.target.id);
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const openModal = document.querySelector('.modal-overlay.show');
+                if (openModal) {
+                    closeModal(openModal.id);
+                }
+            }
+        });
+
+        // Load and display markdown file in modal
+        async function loadMarkdown(filename, contentElementId) {
+            const contentElement = document.getElementById(contentElementId);
+            
+            try {
+                const response = await fetch(filename);
+                if (!response.ok) {
+                    throw new Error(`Failed to load ${filename}`);
+                }
+                
+                const markdownText = await response.text();
+                const htmlContent = marked.parse(markdownText);
+                contentElement.innerHTML = htmlContent;
+            } catch (error) {
+                console.error('Error loading markdown:', error);
+                
+                // Provide a friendly fallback for about page
+                if (filename.startsWith('about_')) {
+                    // Just show nothing for about - the empty state text will show below
+                    contentElement.innerHTML = '';
+                } else {
+                    contentElement.innerHTML = `<p style="color: #D32F2F;">Error loading content: ${error.message}</p>`;
+                }
+            }
+        }
+
+        // Setup navigation links
+        function setupNavLinks() {
+            const valserdeutschLink = document.getElementById('valserdeutschLink');
+            const abbreviationsLink = document.getElementById('abbreviationsLink');
+            const aboutLink = document.getElementById('aboutLink');
+            
+            if (valserdeutschLink) {
+                valserdeutschLink.addEventListener('click', () => {
+                    openModal('valserdeutschModal');
+                    loadMarkdown(`valserdeutsch_${currentLang}.md`, 'valserdeutschContent');
+                });
+            }
+
+            if (abbreviationsLink) {
+                abbreviationsLink.addEventListener('click', () => {
+                    openModal('abbreviationsModal');
+                    loadMarkdown(`abbreviations_${currentLang}.md`, 'abbreviationsContent');
+                });
+            }
+
+            if (aboutLink) {
+                aboutLink.addEventListener('click', () => {
+                    openModal('aboutModal');
+                    loadMarkdown(`about_${currentLang}.md`, 'aboutContent');
+                });
+            }
+        }
+
+        // Setup xref listeners for tooltips and navigation
+        function setupXrefListeners() {
+            const xrefs = document.querySelectorAll('.xref');
+            
+            xrefs.forEach(xref => {
+                const word = xref.dataset.word;
+                let tapTimeout = null;
+                let hasTooltip = false;
+
+                // Desktop: hover to show tooltip
+                xref.addEventListener('mouseenter', (e) => {
+                    if (window.innerWidth > 768) {
+                        showTooltip(xref, word);
+                    }
+                });
+
+                xref.addEventListener('mouseleave', (e) => {
+                    if (window.innerWidth > 768) {
+                        hideTooltip(xref);
+                    }
+                });
+
+                // Mobile: first tap shows tooltip, second tap navigates
+                xref.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    
+                    if (window.innerWidth <= 768) {
+                        // Mobile behavior
+                        if (!hasTooltip) {
+                            // First tap: show tooltip
+                            showTooltip(xref, word);
+                            hasTooltip = true;
+                            
+                            // Hide tooltip after 3 seconds
+                            tapTimeout = setTimeout(() => {
+                                hideTooltip(xref);
+                                hasTooltip = false;
+                            }, 3000);
+                        } else {
+                            // Second tap: navigate
+                            clearTimeout(tapTimeout);
+                            hideTooltip(xref);
+                            hasTooltip = false;
+                            jumpToWord(word);
+                        }
+                    } else {
+                        // Desktop: click to navigate
+                        jumpToWord(word);
+                    }
+                });
+            });
+        }
+
+        // Show tooltip for xref
+        function showTooltip(xrefElement, word) {
+            // Find the word in dictionary
+            const index = dictionaryData.findIndex(entry => {
+                const headword = entry.word.find(w => w.type === 'headword');
+                return headword && headword.text.toLowerCase() === word.toLowerCase();
+            });
+
+            if (index !== -1) {
+                const entry = dictionaryData[index];
+                const headword = entry.word.find(w => w.type === 'headword');
+                
+                // Create tooltip
+                const tooltip = document.createElement('div');
+                tooltip.className = 'xref-tooltip';
+                
+                let definition = entry.definition || '';
+                // Strip HTML tags for preview
+                definition = definition.replace(/<[^>]*>/g, '');
+                // Truncate if too long
+                if (definition.length > 150) {
+                    definition = definition.substring(0, 150) + '...';
+                }
+                
+                tooltip.innerHTML = `
+                    <div class="xref-tooltip-headword">${headword.text}</div>
+                    <div class="xref-tooltip-definition">${definition}</div>
+                `;
+                
+                xrefElement.appendChild(tooltip);
+                
+                // Adjust position to stay within the word detail frame
+                setTimeout(() => {
+                    const tooltipRect = tooltip.getBoundingClientRect();
+                    const mainPanel = document.getElementById('mainPanel');
+                    const panelRect = mainPanel.getBoundingClientRect();
+                    
+                    // Check horizontal bounds
+                    if (tooltipRect.left < panelRect.left) {
+                        // Too far left - align to left edge of panel
+                        const offset = panelRect.left - tooltipRect.left + 10;
+                        tooltip.style.left = '0';
+                        tooltip.style.transform = `translateX(${offset}px)`;
+                    } else if (tooltipRect.right > panelRect.right) {
+                        // Too far right - align to right edge of panel
+                        const offset = tooltipRect.right - panelRect.right + 10;
+                        tooltip.style.left = 'auto';
+                        tooltip.style.right = '0';
+                        tooltip.style.transform = `translateX(-${offset}px)`;
+                    }
+                    
+                    // Check vertical bounds (if tooltip goes above panel)
+                    if (tooltipRect.top < panelRect.top) {
+                        // Position below instead of above
+                        tooltip.style.bottom = 'auto';
+                        tooltip.style.top = '100%';
+                        tooltip.style.marginTop = '0.5rem';
+                        tooltip.style.marginBottom = '0';
+                    }
+                    
+                    tooltip.classList.add('show');
+                }, 10);
+            }
+        }
+
+        // Hide tooltip
+        function hideTooltip(xrefElement) {
+            const tooltip = xrefElement.querySelector('.xref-tooltip');
+            if (tooltip) {
+                tooltip.classList.remove('show');
+                setTimeout(() => {
+                    tooltip.remove();
+                }, 200);
+            }
+        }
+
+        // Jump to a word (for cross-references)
+        function jumpToWord(word) {
+            const index = dictionaryData.findIndex(entry => {
+                const headword = entry.word.find(w => w.type === 'headword');
+                return headword && headword.text.toLowerCase() === word.toLowerCase();
+            });
+
+            if (index !== -1) {
+                selectWord(index);
+            } else {
+                alert(`Word "${word}" not found in dictionary`);
+            }
+        }
+
+        // Search functionality
+        function setupSearch() {
+            const searchInput = document.getElementById('searchInput');
+            const searchClear = document.getElementById('searchClear');
+            
+            // Normalize text by removing accents
+            const normalizeText = (text) => {
+                return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+            };
+            
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                const searchTermNormalized = normalizeText(searchTerm);
+                const wordList = document.getElementById('wordList');
+
+                // Show/hide clear button
+                if (searchTerm) {
+                    searchClear.classList.add('show');
+                } else {
+                    searchClear.classList.remove('show');
+                }
+
+                // If empty search, restore original list
+                if (!searchTerm) {
+                    renderWordList();
+                    return;
+                }
+
+                // Define all searchable field types
+                const searchableFields = [
+                    'headword',
+                    'plural', 'plural_1', 'plural_2', 'plural_3',
+                    'diminutive', 'diminutive_1', 'diminutive_2',
+                    'past_participle', 'past_participle_1', 'past_participle_2',
+                    'variant', 'variant_plural', 'variant_past_participle',
+                    'alternative', 'alternative_1',
+                    'alternative_plural', 'alternative_diminutive',
+                    'alternative_past_participle', 'alternative_1_past_participle',
+                    'alternative_variant', 'alternative_1_variant',
+                    'alternative_2', 'alternative_2_past_participle', 'alternative_2_variant',
+                    'alternative_3', 'alternative_3_variant',
+                    'alternative_4'
+                ];
+
+                // Get all word items with their indices and relevance scores
+                const scoredItems = dictionaryData.map((entry, index) => {
+                    let score = -1;
+                    let matchFound = false;
+                    
+                    // Check all searchable fields
+                    searchableFields.forEach((fieldType) => {
+                        const field = entry.word.find(w => w.type === fieldType);
+                        if (field && field.text) {
+                            const fieldText = field.text.toLowerCase();
+                            const fieldTextNormalized = normalizeText(field.text);
+                            
+                            // Score based on field type and match type
+                            let fieldScore = 0;
+                            
+                            // Check match type (using normalized text for accent-insensitive search)
+                            if (fieldTextNormalized === searchTermNormalized) {
+                                // Exact match
+                                if (fieldType === 'headword') {
+                                    fieldScore = 3; // Highest priority
+                                } else if (fieldType.startsWith('alternative')) {
+                                    fieldScore = 2.5;
+                                } else {
+                                    fieldScore = 2.7;
+                                }
+                                matchFound = true;
+                            } else if (fieldTextNormalized.startsWith(searchTermNormalized)) {
+                                // Starts with
+                                if (fieldType === 'headword') {
+                                    fieldScore = 2; // Second highest
+                                } else if (fieldType.startsWith('alternative')) {
+                                    fieldScore = 1.5;
+                                } else {
+                                    fieldScore = 1.7;
+                                }
+                                matchFound = true;
+                            } else if (fieldTextNormalized.includes(searchTermNormalized)) {
+                                // Contains
+                                if (fieldType === 'headword') {
+                                    fieldScore = 1; // Third priority
+                                } else if (fieldType.startsWith('alternative')) {
+                                    fieldScore = 0.5;
+                                } else {
+                                    fieldScore = 0.7;
+                                }
+                                matchFound = true;
+                            }
+                            
+                            score = Math.max(score, fieldScore);
+                        }
+                    });
+                    
+                    return { index, entry, score, matchFound };
+                });
+
+                // Filter and sort by relevance
+                const filteredItems = scoredItems
+                    .filter(({ matchFound }) => matchFound)
+                    .sort((a, b) => b.score - a.score);
+
+                // Clear word list
+                wordList.innerHTML = '';
+
+                // Re-render filtered and sorted items with highlighting
+                filteredItems.forEach(({ index, entry }) => {
+                    const wordItem = document.createElement('div');
+                    wordItem.className = 'word-item';
+                    wordItem.dataset.index = index;
+
+                    const headword = entry.word.find(w => w.type === 'headword');
+                    const variants = entry.word.filter(w => w.type === 'variant');
+
+                    // Highlight matching text (accent-insensitive)
+                    const highlightText = (text) => {
+                        const textNormalized = normalizeText(text);
+                        const startIndex = textNormalized.indexOf(searchTermNormalized);
+                        
+                        if (startIndex === -1) return text;
+                        
+                        const before = text.substring(0, startIndex);
+                        const match = text.substring(startIndex, startIndex + searchTerm.length);
+                        const after = text.substring(startIndex + searchTerm.length);
+                        
+                        return `${before}<span class="search-highlight">${match}</span>${after}`;
+                    };
+
+                    let displayText = `<span class="headword">${highlightText(headword.text)}</span>`;
+                    if (variants.length > 0) {
+                        const highlightedVariants = variants.map(v => highlightText(v.text)).join(', ');
+                        displayText += ` <span class="variant">/ ${highlightedVariants}</span>`;
+                    }
+
+                    wordItem.innerHTML = displayText;
+                    wordItem.addEventListener('click', () => selectWord(index));
+
+                    wordList.appendChild(wordItem);
+                });
+            });
+
+            // Clear button functionality
+            searchClear.addEventListener('click', () => {
+                searchInput.value = '';
+                searchClear.classList.remove('show');
+                
+                // Reset to original order
+                renderWordList();
+                
+                // Focus back on input
+                searchInput.focus();
+            });
+        }
+
+        // Language toggle
+        function setupLanguageToggle() {
+            const langSwitch = document.getElementById('langSwitch');
+            langSwitch.addEventListener('change', (e) => {
+                currentLang = e.target.checked ? 'en' : 'de';
+                updateLanguage();
+            });
+        }
+
+        // Update UI language
+        function updateLanguage() {
+            const t = translations[currentLang];
+            document.getElementById('headerTitle').textContent = t.headerTitle;
+            document.getElementById('searchInput').placeholder = t.searchPlaceholder;
+            document.getElementById('searchClear').title = t.clearSearch;
+            document.getElementById('valserdeutschLink').textContent = t.valserdeutschLink;
+            document.getElementById('abbreviationsLink').textContent = t.abbreviationsLink;
+            document.getElementById('aboutLink').textContent = t.aboutLink;
+            
+            const loadingText = document.getElementById('loadingText');
+            const filePickerTitle = document.getElementById('filePickerTitle');
+            const filePickerText = document.getElementById('filePickerText');
+            
+            if (loadingText) loadingText.textContent = t.loading;
+            if (filePickerTitle) filePickerTitle.textContent = t.filePickerTitle;
+            if (filePickerText) filePickerText.textContent = t.filePickerText;
+            
+            // Re-render current word detail to update labels
+            if (activeWordIndex !== null) {
+                renderWordDetail(activeWordIndex);
+            } else {
+                // If we're still on welcome state, reload it with new language
+                const welcomeState = document.getElementById('welcomeState');
+                if (welcomeState) {
+                    const mainPanel = document.getElementById('mainPanel');
+                    welcomeState.remove();
+                    
+                    const newWelcomeState = document.createElement('div');
+                    newWelcomeState.className = 'word-detail-wrapper';
+                    newWelcomeState.id = 'welcomeState';
+                    newWelcomeState.style.padding = '2rem';
+                    
+                    const introContainer = document.createElement('div');
+                    introContainer.id = 'introContent';
+                    newWelcomeState.appendChild(introContainer);
+                    
+                    // Add horizontal separator
+                    const separator = document.createElement('hr');
+                    separator.style.border = 'none';
+                    separator.style.borderTop = '2px solid var(--light-gray)';
+                    separator.style.margin = '2rem 0';
+                    newWelcomeState.appendChild(separator);
+                    
+                    const emptyStateContainer = document.createElement('div');
+                    emptyStateContainer.style.textAlign = 'center';
+                    emptyStateContainer.style.color = 'var(--text-medium)';
+                    emptyStateContainer.innerHTML = `
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📖</div>
+                        <h2 style="color: var(--text-dark); margin-bottom: 0.5rem;">${t.emptyTitle}</h2>
+                        <p>${t.emptyText}</p>
+                    `;
+                    newWelcomeState.appendChild(emptyStateContainer);
+                    
+                    mainPanel.appendChild(newWelcomeState);
+                    loadMarkdown(`about_${currentLang}.md`, 'introContent');
+                }
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            setupSearch();
+            
+            // Close tooltips when clicking outside (mobile)
+            document.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('xref')) {
+                    document.querySelectorAll('.xref-tooltip').forEach(tooltip => {
+                        tooltip.classList.remove('show');
+                        setTimeout(() => tooltip.remove(), 200);
+                    });
+                }
+            });
+        }
+
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check URL for language parameter first (takes priority)
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlLang = urlParams.get('lang');
+            
+            if (urlLang && (urlLang === 'de' || urlLang === 'en')) {
+                // URL has language parameter - use it
+                currentLang = urlLang;
+                const langSwitch = document.getElementById('langSwitch');
+                langSwitch.checked = (urlLang === 'en');
+            } else {
+                // No URL parameter - check if language switch is already toggled (e.g., after refresh)
+                const langSwitch = document.getElementById('langSwitch');
+                if (langSwitch.checked) {
+                    currentLang = 'en';
+                }
+            }
+            
+            setupNavLinks();
+            setupLanguageToggle();
+            
+            // Update UI to match current language before loading dictionary
+            updateLanguage();
+            
+            loadDictionary();
+        });
+    </script>
+</body>
+</html>
