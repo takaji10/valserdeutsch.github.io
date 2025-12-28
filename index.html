@@ -747,6 +747,85 @@
             opacity: 0.8;
         }
 
+        .burger-menu {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            padding: 0.5rem;
+            background: white;
+            border-radius: 4px;
+            gap: 4px;
+        }
+
+        .burger-menu span {
+            width: 24px;
+            height: 3px;
+            background: var(--vals-black);
+            transition: 0.3s;
+        }
+
+        .mobile-nav-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 200;
+        }
+
+        .mobile-nav-overlay.show {
+            display: block;
+        }
+
+        .mobile-nav-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 280px;
+            height: 100%;
+            background: white;
+            z-index: 201;
+            transition: right 0.3s;
+            padding: 2rem;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .mobile-nav-menu.show {
+            right: 0;
+        }
+
+        .mobile-nav-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--vals-black);
+            font-weight: 700;
+        }
+
+        .mobile-nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 3rem;
+        }
+
+        .mobile-nav-links a {
+            color: var(--vals-black);
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-gray);
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -1086,6 +1165,179 @@
         ::-webkit-scrollbar-thumb:hover {
             background: var(--swiss-red);
         }
+
+        /* Mobile-specific styles */
+        @media (max-width: 768px) {
+            /* Remove body margins/padding on mobile */
+            body {
+                margin: 0;
+                padding: 0;
+                overflow-x: hidden;
+            }
+
+            /* Change header gradient to 60/40 on mobile */
+            header {
+                background: linear-gradient(135deg, var(--vals-black) 0%, var(--vals-black) 60%, var(--vals-yellow) 60%, var(--vals-yellow) 100%);
+            }
+
+            /* Adjust header layout for mobile - center align items */
+            .header-content {
+                align-items: center;
+            }
+
+            /* Stack burger and language toggle vertically on mobile */
+            .header-content > div:last-child {
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 0.25rem;
+                margin-left: auto;
+            }
+
+            /* Hide the header language toggle on mobile - we'll show it in the burger menu */
+            .header-content .lang-toggle {
+                display: none;
+            }
+
+            /* Make burger square and center-align with site name */
+            .burger-menu {
+                padding: 0.6rem;
+                align-self: center;
+            }
+
+            /* Mobile language toggle inside burger menu */
+            .mobile-lang-toggle {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 0.5rem;
+                background: rgba(253, 221, 4, 0.1);
+                padding: 1rem;
+                border-radius: 8px;
+                margin-top: auto;
+            }
+
+            /* Make search box sticky on mobile */
+            .search-box {
+                position: sticky;
+                top: 0;
+                z-index: 50;
+                background: white;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+
+            /* Sidebar adjustments for sticky search */
+            .sidebar {
+                display: flex;
+                flex-direction: column;
+                height: calc(100vh - 85px);
+            }
+
+            /* Make content-with-tabs scrollable */
+            .content-with-tabs {
+                flex: 1;
+                overflow-y: auto;
+            }
+
+            /* Show burger menu, hide desktop nav links */
+            .burger-menu {
+                display: flex;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            /* Make container full width with no margins on mobile */
+            .container {
+                flex-direction: column;
+                padding: 0;
+                margin: 0;
+                min-height: calc(100vh - 85px);
+            }
+
+            /* Make sidebar wider and full width */
+            .sidebar {
+                width: 100%;
+                max-width: 100%;
+                border-right: none;
+                border-bottom: 2px solid var(--border-gray);
+                padding-bottom: 0;
+                margin-bottom: 0;
+            }
+
+            /* Ensure word list fills available space */
+            .word-list {
+                padding-bottom: 1rem;
+            }
+
+            /* Hide main panel on mobile (we'll show inline instead) */
+            .main-panel {
+                display: none;
+            }
+
+            /* Inline word detail styles for mobile */
+            .word-item-expanded {
+                background: var(--light-gray);
+            }
+
+            .inline-word-detail {
+                padding: 1.5rem;
+                background: white;
+                border-left: 4px solid var(--vals-yellow);
+                margin: 0.5rem 0;
+                animation: expandDown 0.3s ease-out;
+            }
+
+            @keyframes expandDown {
+                from {
+                    opacity: 0;
+                    max-height: 0;
+                    padding-top: 0;
+                    padding-bottom: 0;
+                }
+                to {
+                    opacity: 1;
+                    max-height: 2000px;
+                    padding-top: 1.5rem;
+                    padding-bottom: 1.5rem;
+                }
+            }
+
+            /* Single column layout for word forms on mobile */
+            .inline-word-detail .word-forms-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .inline-word-detail .alternatives-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* Hide navigation buttons on mobile */
+            .word-navigation {
+                display: none !important;
+            }
+
+            /* Adjust headword size for mobile inline view */
+            .inline-word-detail .detail-headword {
+                font-size: 1.5rem;
+            }
+
+            /* Permalink button adjustment for mobile */
+            .inline-word-detail .permalink-button svg {
+                width: 16px;
+                height: 16px;
+            }
+
+            /* Back button styling on mobile - smaller at bottom */
+            .inline-word-detail .back-button.bottom {
+                font-size: 0.85rem;
+                padding: 0.4rem 0.8rem;
+                margin-top: 1.5rem;
+                margin-bottom: 0.5rem;
+                width: 100%;
+                justify-content: center;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1098,6 +1350,11 @@
                     <a class="nav-link" id="abbreviationsLink">Abkürzungen</a>
                     <a class="nav-link" id="aboutLink">Über</a>
                 </div>
+                <div class="burger-menu" id="burgerMenu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
                 <div class="lang-toggle">
                     <label for="langSwitch">DE</label>
                     <label class="switch">
@@ -1109,6 +1366,25 @@
             </div>
         </div>
     </header>
+
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav-overlay" id="mobileNavOverlay"></div>
+    <div class="mobile-nav-menu" id="mobileNavMenu">
+        <button class="mobile-nav-close" id="mobileNavClose">×</button>
+        <div class="mobile-nav-links">
+            <a id="mobileValserdeutschLink">Valserdeutsch</a>
+            <a id="mobileAbbreviationsLink">Abkürzungen</a>
+            <a id="mobileAboutLink">Über</a>
+        </div>
+        <div class="mobile-lang-toggle">
+            <label for="mobileLangSwitch" style="font-weight: 600; color: var(--vals-black);">DE</label>
+            <label class="switch">
+                <input type="checkbox" id="mobileLangSwitch">
+                <span class="slider"></span>
+            </label>
+            <label for="mobileLangSwitch" style="font-weight: 600; color: var(--vals-black);">EN</label>
+        </div>
+    </div>
 
     <div class="container">
         <aside class="sidebar">
@@ -1527,27 +1803,66 @@
         }
 
         // Select a word
+        // Check if we're on mobile
+        function isMobile() {
+            return window.innerWidth <= 768;
+        }
+
         function selectWord(index, addToHistory = true) {
+            // Check if clicking on already-expanded word on mobile (toggle behavior)
+            const targetItem = document.querySelector(`.word-item[data-index="${index}"]`);
+            
+            if (isMobile() && targetItem && targetItem.classList.contains('word-item-expanded') && activeWordIndex === index) {
+                // Toggle: collapse the currently expanded word
+                targetItem.classList.remove('active', 'word-item-expanded');
+                const existingInline = targetItem.nextElementSibling;
+                if (existingInline && existingInline.classList.contains('inline-word-detail')) {
+                    existingInline.remove();
+                }
+                activeWordIndex = null;
+                return;
+            }
+            
             // Add current word to history before navigating
             if (addToHistory && activeWordIndex !== null && activeWordIndex !== index) {
                 navigationHistory.push(activeWordIndex);
             }
 
-            // Remove previous active state
+            // Remove previous active state and inline details
             document.querySelectorAll('.word-item').forEach(item => {
-                item.classList.remove('active');
+                item.classList.remove('active', 'word-item-expanded');
+                // Remove any existing inline detail
+                const existingInline = item.nextElementSibling;
+                if (existingInline && existingInline.classList.contains('inline-word-detail')) {
+                    existingInline.remove();
+                }
             });
 
             // Set new active state - find by data-index attribute
-            const targetItem = document.querySelector(`.word-item[data-index="${index}"]`);
             if (targetItem) {
                 targetItem.classList.add('active');
-                // Scroll the word into view in the sidebar
-                targetItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+                if (isMobile()) {
+                    // Mobile: expand inline
+                    targetItem.classList.add('word-item-expanded');
+                    renderWordDetailInline(index, targetItem);
+                    
+                    // Scroll the word to the top
+                    setTimeout(() => {
+                        targetItem.scrollIntoView({ 
+                            behavior: 'smooth', 
+                            block: 'start',
+                            inline: 'nearest'
+                        });
+                    }, 100);
+                } else {
+                    // Desktop: show in main panel
+                    targetItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    renderWordDetail(index);
+                }
             }
 
             activeWordIndex = index;
-            renderWordDetail(index);
         }
 
         // Go back to previous word
@@ -1620,12 +1935,6 @@
             const gender = getField('gender');
             const usageNote = getField('usage_note');
 
-            // Add back button if there's navigation history
-            let html = '';
-            if (navigationHistory.length > 0) {
-                html += `<button class="back-button show" onclick="goBack()">← ${t.back}</button>`;
-            }
-
             // Process usage note if it exists
             let processedUsageNote = '';
             if (usageNote) {
@@ -1644,7 +1953,7 @@
                     });
             }
 
-            html += `<div class="detail-headword">
+            let html = `<div class="detail-headword">
                 <div class="headword-text">
                     <span>${headword.text}</span>
                     ${gender ? `<span class="detail-gender">${gender.text}</span>` : ''}
@@ -1838,6 +2147,11 @@
                 `;
             }
 
+            // Add back button at bottom if there's navigation history
+            if (navigationHistory.length > 0) {
+                html += `<button class="back-button show bottom" onclick="goBack()">← ${t.back}</button>`;
+            }
+
             wordDetail.innerHTML = html;
             wrapper.appendChild(wordDetail);
             mainPanel.appendChild(wrapper);
@@ -1898,6 +2212,31 @@
 
             navDiv.innerHTML = navHtml;
             mainPanel.appendChild(navDiv);
+        }
+
+        // Render word detail inline (for mobile)
+        function renderWordDetailInline(index, targetItem) {
+            // First render to desktop panel (hidden on mobile)
+            renderWordDetail(index);
+            
+            // Then copy the HTML to inline
+            const mainPanel = document.getElementById('mainPanel');
+            const wordDetailWrapper = mainPanel.querySelector('.word-detail-wrapper');
+            
+            if (wordDetailWrapper) {
+                // Create inline detail container
+                const inlineDetail = document.createElement('div');
+                inlineDetail.className = 'inline-word-detail';
+                
+                // Copy the content
+                inlineDetail.innerHTML = wordDetailWrapper.innerHTML;
+                
+                // Insert after the word item
+                targetItem.parentNode.insertBefore(inlineDetail, targetItem.nextSibling);
+                
+                // Setup xref listeners for the inline detail
+                setupXrefListenersForElement(inlineDetail);
+            }
         }
 
         // Navigate to a word by index
@@ -2039,6 +2378,138 @@
                     loadMarkdown(`about_${currentLang}.md`, 'aboutContent');
                 });
             }
+        }
+
+        // Setup burger menu and mobile navigation
+        function setupBurgerMenu() {
+            const burgerMenu = document.getElementById('burgerMenu');
+            const mobileNavOverlay = document.getElementById('mobileNavOverlay');
+            const mobileNavMenu = document.getElementById('mobileNavMenu');
+            const mobileNavClose = document.getElementById('mobileNavClose');
+            
+            // Mobile nav links
+            const mobileValserdeutschLink = document.getElementById('mobileValserdeutschLink');
+            const mobileAbbreviationsLink = document.getElementById('mobileAbbreviationsLink');
+            const mobileAboutLink = document.getElementById('mobileAboutLink');
+            
+            // Open mobile menu
+            if (burgerMenu) {
+                burgerMenu.addEventListener('click', () => {
+                    mobileNavOverlay.classList.add('show');
+                    mobileNavMenu.classList.add('show');
+                });
+            }
+            
+            // Close mobile menu
+            const closeMobileNav = () => {
+                mobileNavOverlay.classList.remove('show');
+                mobileNavMenu.classList.remove('show');
+            };
+            
+            if (mobileNavClose) {
+                mobileNavClose.addEventListener('click', closeMobileNav);
+            }
+            
+            if (mobileNavOverlay) {
+                mobileNavOverlay.addEventListener('click', closeMobileNav);
+            }
+            
+            // Mobile nav link actions
+            if (mobileValserdeutschLink) {
+                mobileValserdeutschLink.addEventListener('click', () => {
+                    closeMobileNav();
+                    openModal('valserdeutschModal');
+                    loadMarkdown(`valserdeutsch_${currentLang}.md`, 'valserdeutschContent');
+                });
+            }
+            
+            if (mobileAbbreviationsLink) {
+                mobileAbbreviationsLink.addEventListener('click', () => {
+                    closeMobileNav();
+                    openModal('abbreviationsModal');
+                    loadMarkdown(`abbreviations_${currentLang}.md`, 'abbreviationsContent');
+                });
+            }
+            
+            if (mobileAboutLink) {
+                mobileAboutLink.addEventListener('click', () => {
+                    closeMobileNav();
+                    openModal('aboutModal');
+                    loadMarkdown(`about_${currentLang}.md`, 'aboutContent');
+                });
+            }
+            
+            // Setup mobile language toggle
+            const mobileLangSwitch = document.getElementById('mobileLangSwitch');
+            const headerLangSwitch = document.getElementById('langSwitch');
+            
+            if (mobileLangSwitch && headerLangSwitch) {
+                // Sync mobile toggle with header toggle on init
+                mobileLangSwitch.checked = headerLangSwitch.checked;
+                
+                // When mobile toggle changes, update header toggle
+                mobileLangSwitch.addEventListener('change', () => {
+                    headerLangSwitch.checked = mobileLangSwitch.checked;
+                    currentLang = mobileLangSwitch.checked ? 'en' : 'de';
+                    updateLanguage();
+                    
+                    // Re-render word list to update labels
+                    renderWordList();
+                    
+                    // Update current word detail if one is active
+                    if (activeWordIndex !== null) {
+                        if (isMobile()) {
+                            const targetItem = document.querySelector(`.word-item[data-index="${activeWordIndex}"]`);
+                            if (targetItem && targetItem.classList.contains('word-item-expanded')) {
+                                // Re-render inline detail with new language
+                                const existingInline = targetItem.nextElementSibling;
+                                if (existingInline && existingInline.classList.contains('inline-word-detail')) {
+                                    existingInline.remove();
+                                }
+                                renderWordDetailInline(activeWordIndex, targetItem);
+                            }
+                        } else {
+                            renderWordDetail(activeWordIndex);
+                        }
+                    }
+                });
+            }
+        }
+
+        // Setup xref listeners for a specific element
+        function setupXrefListenersForElement(element) {
+            const xrefs = element.querySelectorAll('.xref');
+            
+            xrefs.forEach(xref => {
+                const targetWord = xref.dataset.word;
+                
+                xref.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    
+                    const index = dictionaryData.findIndex(entry => {
+                        const headword = entry.word.find(w => w.type === 'headword');
+                        return headword && headword.text.toLowerCase() === targetWord.toLowerCase();
+                    });
+                    
+                    if (index !== -1) {
+                        selectWord(index);
+                    }
+                });
+                
+                // Add hover tooltip
+                xref.addEventListener('mouseenter', (e) => {
+                    const tooltip = showTooltip(targetWord, xref);
+                    xref.appendChild(tooltip);
+                });
+                
+                xref.addEventListener('mouseleave', () => {
+                    const tooltip = xref.querySelector('.xref-tooltip');
+                    if (tooltip) {
+                        tooltip.classList.remove('show');
+                        setTimeout(() => tooltip.remove(), 200);
+                    }
+                });
+            });
         }
 
         // Setup xref listeners for tooltips and navigation
@@ -2343,8 +2814,16 @@
         // Language toggle
         function setupLanguageToggle() {
             const langSwitch = document.getElementById('langSwitch');
+            const mobileLangSwitch = document.getElementById('mobileLangSwitch');
+            
             langSwitch.addEventListener('change', (e) => {
                 currentLang = e.target.checked ? 'en' : 'de';
+                
+                // Sync mobile toggle
+                if (mobileLangSwitch) {
+                    mobileLangSwitch.checked = e.target.checked;
+                }
+                
                 updateLanguage();
             });
         }
@@ -2358,6 +2837,11 @@
             document.getElementById('valserdeutschLink').textContent = t.valserdeutschLink;
             document.getElementById('abbreviationsLink').textContent = t.abbreviationsLink;
             document.getElementById('aboutLink').textContent = t.aboutLink;
+            
+            // Update mobile nav links
+            document.getElementById('mobileValserdeutschLink').textContent = t.valserdeutschLink;
+            document.getElementById('mobileAbbreviationsLink').textContent = t.abbreviationsLink;
+            document.getElementById('mobileAboutLink').textContent = t.aboutLink;
             
             const loadingText = document.getElementById('loadingText');
             const filePickerTitle = document.getElementById('filePickerTitle');
@@ -2430,20 +2914,24 @@
             const urlParams = new URLSearchParams(window.location.search);
             const urlLang = urlParams.get('lang');
             
+            const langSwitch = document.getElementById('langSwitch');
+            const mobileLangSwitch = document.getElementById('mobileLangSwitch');
+            
             if (urlLang && (urlLang === 'de' || urlLang === 'en')) {
                 // URL has language parameter - use it
                 currentLang = urlLang;
-                const langSwitch = document.getElementById('langSwitch');
                 langSwitch.checked = (urlLang === 'en');
+                if (mobileLangSwitch) mobileLangSwitch.checked = (urlLang === 'en');
             } else {
                 // No URL parameter - check if language switch is already toggled (e.g., after refresh)
-                const langSwitch = document.getElementById('langSwitch');
                 if (langSwitch.checked) {
                     currentLang = 'en';
+                    if (mobileLangSwitch) mobileLangSwitch.checked = true;
                 }
             }
             
             setupNavLinks();
+            setupBurgerMenu();
             setupLanguageToggle();
             
             // Update UI to match current language before loading dictionary
